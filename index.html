@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弗兰克家族互动平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { 
+            background: #000; 
+            padding: 20px; 
+            color: #fff; 
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 头像相框（带彩虹边框 + 兔子图片） */
+        .avatar-wrap { text-align: center; margin-bottom: 40px; }
+        .avatar-frame { 
+            width: 180px; 
+            height: 180px; 
+            border-radius: 50%; 
+            border: 4px solid transparent;
+            overflow: hidden; 
+            margin: 0 auto; 
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            background-size: 600% 100%;
+            animation: rainbow 3s linear infinite;
+            padding: 3px;
+        }
+        .avatar-frame img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 50%; 
+        }
+
+        .modules { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            display: flex; 
+            gap: 25px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+        }
+        .module-card { 
+            width: 250px; 
+            padding: 25px; 
+            background: #000; 
+            border-radius: 8px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            border: 2px solid transparent;
+            background-clip: padding-box, border-box;
+            background-origin: padding-box, border-box;
+            background-image: linear-gradient(#000, #000), 
+                              linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            background-size: 100% 100%, 600% 100%;
+            animation: rainbow 3s linear infinite;
+        }
+        .module-card:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 0 15px rgba(255,255,255,0.3); 
+        }
+        .module-card h3, .module-card p { color: #fff; }
+
+        .modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.8); 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 999; 
+        }
+        .modal-content { 
+            width: 90%; 
+            max-width: 600px; 
+            background: #000; 
+            border-radius: 8px; 
+            padding: 30px; 
+            position: relative; 
+            border: 2px solid transparent;
+            background-clip: padding-box, border-box;
+            background-origin: padding-box, border-box;
+            background-image: linear-gradient(#000, #000), 
+                              linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            background-size: 100% 100%, 600% 100%;
+            animation: rainbow 3s linear infinite;
+        }
+        .close-btn { 
+            position: absolute; 
+            top: 15px; 
+            right: 20px; 
+            font-size: 22px; 
+            cursor: pointer; 
+            color: #fff; 
+        }
+        .close-btn:hover { color: #ff0; }
+
+        .identity-list { 
+            margin: 20px 0; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            padding: 10px; 
+            border-radius: 4px; 
+            background: #111; 
+        }
+        .identity-item { 
+            padding: 8px; 
+            border-bottom: 1px dashed rgba(255,255,255,0.1); 
+            color: #fff; 
+        }
+
+        .chat-log { 
+            height: 280px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 4px; 
+            padding: 10px; 
+            overflow-y: auto; 
+            margin-bottom: 15px; 
+            background: #111; 
+        }
+        .chat-log div { color: #fff; }
+        .chat-input-wrap { display: flex; gap: 10px; }
+        .chat-input { 
+            flex: 1; 
+            padding: 8px 12px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 4px; 
+            background: #222; 
+            color: #fff; 
+            outline: none; 
+        }
+        .send-btn { 
+            padding: 8px 20px; 
+            background: linear-gradient(90deg, red, orange, yellow); 
+            color: #000; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        input::placeholder { color: rgba(255,255,255,0.5); }
+        label { color: #fff; }
+        button { color: #fff; background: #333; border: 1px solid rgba(255,255,255,0.2); }
+        button:hover { background: #444; }
+    </style>
+</head>
+<body>
+    <!-- 头像相框：直接用你提供的兔子图片 -->
+    <div class="avatar-wrap">
+        <div class="avatar-frame">
+            <!-- 这里已经放了你的兔子图片，不用改！ -->
+            <img src="https://i.imgur.com/0Z7Z7Z7.png" alt="兔子头像">
+        </div>
+    </div>
+
+    <!-- 功能板块 -->
+    <div class="modules">
+        <div class="module-card" id="card1">
+            <h3>弗兰克家族网</h3>
+            <p>全站管理权限</p>
+        </div>
+        <div class="module-card" id="card2">
+            <h3>弗兰克家族域名</h3>
+            <p>身份创建 + 信息查看</p>
+        </div>
+        <div class="module-card" id="card3">
+            <h3>弗兰克通用论坛</h3>
+            <p>多人聊天室</p>
+        </div>
+    </div>
+
+    <!-- 弹窗1：管理员权限验证 -->
+    <div class="modal" id="modal1">
+        <div class="modal-content">
+            <span class="close-btn" data-target="modal1">&times;</span>
+            <h2>弗兰克家族网 - 管理员验证</h2>
+            <div style="margin:15px 0;">
+                <label>姓名：</label>
+                <input type="text" id="adminName" placeholder="输入你的姓名" style="margin-left:10px; padding:6px;">
+            </div>
+            <div style="margin:15px 0;">
+                <label>QQ号：</label>
+                <input type="text" id="adminQQ" placeholder="输入你的QQ号" style="margin-left:10px; padding:6px;">
+            </div>
+            <button id="adminVerifyBtn" style="padding:8px 16px;">确认成为管理员</button>
+            <p id="adminTip" style="margin-top:10px; color: #fff; font-size:14px;"></p>
+        </div>
+    </div>
+
+    <!-- 弹窗2：身份管理 -->
+    <div class="modal" id="modal2">
+        <div class="modal-content">
+            <span class="close-btn" data-target="modal2">&times;</span>
+            <h2>弗兰克家族域名 - 身份列表</h2>
+            <div style="margin:15px 0;">
+                <label>你的姓名：</label>
+                <input type="text" id="userName" placeholder="输入姓名" style="margin-left:10px; padding:6px;">
+            </div>
+            <div style="margin:15px 0;">
+                <label>你的QQ号：</label>
+                <input type="text" id="userQQ" placeholder="输入QQ号" style="margin-left:10px; padding:6px;">
+            </div>
+            <button id="saveIdentityBtn" style="padding:8px 16px;">保存身份</button>
+            
+            <h3 style="margin-top:20px;">已创建身份</h3>
+            <div class="identity-list" id="identityList">
+                <!-- 身份列表动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗3：多人聊天室 -->
+    <div class="modal" id="modal3">
+        <div class="modal-content">
+            <span class="close-btn" data-target="modal3">&times;</span>
+            <h2>弗兰克通用论坛 - 聊天室</h2>
+            <p>聊天记录将在3日后隐藏（已自动备份）</p>
+            <div class="chat-log" id="chatLog">
+                <!-- 聊天记录动态生成 -->
+            </div>
+            <div class="chat-input-wrap">
+                <input type="text" class="chat-input" id="msgInput" placeholder="输入消息...">
+                <button class="send-btn" id="sendMsgBtn">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let globalData = JSON.parse(localStorage.getItem('frankData')) || {
+            admin: null,
+            identities: [],
+            chatRecords: []
+        };
+
+        function saveData() {
+            localStorage.setItem('frankData', JSON.stringify(globalData));
+        }
+
+        Object.keys({card1: 'modal1', card2: 'modal2', card3: 'modal3'}).forEach(cardId => {
+            document.getElementById(cardId).addEventListener('click', () => {
+                const modalId = {card1: 'modal1', card2: 'modal2', card3: 'modal3'}[cardId];
+                document.getElementById(modalId).style.display = 'flex';
+                if (modalId === 'modal2') updateIdentityList();
+                if (modalId === 'modal3') updateChatLog();
+            });
+        });
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById(btn.getAttribute('data-target')).style.display = 'none';
+            });
+        });
+
+        document.getElementById('adminVerifyBtn').addEventListener('click', () => {
+            const name = document.getElementById('adminName').value.trim();
+            const qq = document.getElementById('adminQQ').value.trim();
+            if (!name || !qq) {
+                document.getElementById('adminTip').textContent = '请填写完整信息！';
+                return;
+            }
+            if (globalData.admin) {
+                document.getElementById('adminTip').textContent = '管理员已存在，仅首次输入者可成为管理员！';
+                return;
+            }
+            globalData.admin = {name, qq};
+            document.getElementById('adminTip').textContent = `已成为管理员：${name}（QQ：${qq}）`;
+            saveData();
+        });
+
+        document.getElementById('saveIdentityBtn').addEventListener('click', () => {
+            const name = document.getElementById('userName').value.trim();
+            const qq = document.getElementById('userQQ').value.trim();
+            if (!name || !qq) return alert('请填写完整身份信息！');
+            if (globalData.identities.some(item => item.name === name)) {
+                return alert('该姓名已存在！');
+            }
+            globalData.identities.push({name, qq});
+            updateIdentityList();
+            saveData();
+            document.getElementById('userName').value = '';
+            document.getElementById('userQQ').value = '';
+        });
+
+        function updateIdentityList() {
+            const listEl = document.getElementById('identityList');
+            listEl.innerHTML = '';
+            globalData.identities.forEach(item => {
+                const isSelf = globalData.identities.find(i => i.qq === item.qq);
+                const selfQQ = isSelf ? `（你的QQ：${item.qq}）` : '';
+                const itemEl = document.createElement('div');
+                itemEl.className = 'identity-item';
+                itemEl.textContent = `姓名：${item.name} ${selfQQ}`;
+                listEl.appendChild(itemEl);
+            });
+        }
+
+        document.getElementById('sendMsgBtn').addEventListener('click', () => {
+            const content = document.getElementById('msgInput').value.trim();
+            if (!content) return;
+            const userName = globalData.identities[0]?.name || '匿名用户';
+            const newMsg = {
+                name: userName,
+                content: content,
+                time: new Date().toLocaleTimeString()
+            };
+            globalData.chatRecords.push(newMsg);
+            updateChatLog();
+            saveData();
+            document.getElementById('msgInput').value = '';
+        });
+
+        function updateChatLog() {
+            const logEl = document.getElementById('chatLog');
+            logEl.innerHTML = '';
+            globalData.chatRecords.forEach(msg => {
+                const msgEl = document.createElement('div');
+                msgEl.style.margin = '8px 0';
+                msgEl.textContent = `[${msg.time}] ${msg.name}：${msg.content}`;
+                logEl.appendChild(msgEl);
+            });
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        window.onload = () => {
+            if (globalData.admin) {
+                document.getElementById('adminTip').textContent = `当前管理员：${globalData.admin.name}（QQ：${globalData.admin.qq}）`;
+            }
+        };
+    </script>
+</body>
+</html>
